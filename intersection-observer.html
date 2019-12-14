@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Intersection observed images</title>
+</head>
+<body>
+<style>
+    #images img {
+        max-width: 300px;
+        min-width: 300px;
+        max-height: 300px;
+        min-height: 300px;
+        object-fit: cover;
+        margin-bottom: 30px;
+    }
+
+    .loading {
+        animation-duration: 1s;
+        animation-fill-mode: forwards;
+        animation-iteration-count: infinite;
+        animation-name: placeHolderShimmer;
+        animation-timing-function: linear;
+        background: #f6f7f9;
+        background-image: linear-gradient(to right, #f6f7f9 0%, #e9ebee 20%, #f6f7f9 40%, #f6f7f9 100%);
+        background-repeat: no-repeat;
+    }
+
+    #images {
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+    }
+
+    @keyframes placeHolderShimmer {
+        0% {
+            background-position: -468px 0;
+        }
+        100% {
+            background-position: 468px 0;
+        }
+    }
+</style>
+<div id="images">
+
+</div>
+</body>
+<script lang="js">
+    function ajax_get(url) {
+        return new Promise(resolve => {
+            fetch(url)
+                .then(response => response.json())
+                .then(response => response[0])
+                .then(response => response.url)
+                .then(resolve)
+        });
+    }
+
+    async function appendImg() {
+        const url = await ajax_get('https://api.thecatapi.com/v1/images/search?size=full');
+        const child = document.createElement('img');
+        child.className = 'loading';
+        child.onload = function() {
+            child.className = '';
+        };
+        document.getElementById("images").appendChild(child);
+        observeImg(child, url)
+    }
+
+    function observeImg(img, src) {
+        const lazyImageObserver = new IntersectionObserver(entries => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.setAttribute('src', src)
+                    lazyImageObserver.unobserve(entry.target);
+                }
+            });
+        }, {
+            threshold: [0]
+        });
+        lazyImageObserver.observe(img);
+    }
+
+    [...Array(20).keys()].forEach(appendImg);
+
+</script>
+</html>
