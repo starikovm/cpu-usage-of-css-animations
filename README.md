@@ -1,2 +1,2 @@
-# cpu-consumption-of-intersection-observer
-Demo app to show caveats while using Intersection Observer
+#cpu-usage-of-css-animations
+Demo app to show CPU caveats while using CSS animations
